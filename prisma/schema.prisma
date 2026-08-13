@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Service {
+  id              String        @id @default(cuid())
+  title           String
+  description     String
+  price           Float
+  durationMinutes Int           @default(30)
+  category        String        @default("Cabelo")
+  imageUrl        String?
+  active          Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  appointments    Appointment[]
+}
+
+model Barber {
+  id           String        @id @default(cuid())
+  name         String
+  email        String?       @unique
+  password     String?       @default("123456")
+  phone        String?
+  avatarUrl    String?
+  bio          String?
+  specialties  String?       @default("Corte, Barba")
+  active       Boolean       @default(true)
+  workingHours String?       @default("09:00 - 19:00")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  appointments Appointment[]
+}
+
+model Appointment {
+  id          String   @id @default(cuid())
+  clientName  String
+  clientPhone String
+  date        String
+  timeSlot    String
+  serviceId   String
+  service     Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  barberId    String
+  barber      Barber   @relation(fields: [barberId], references: [id], onDelete: Cascade)
+  totalPrice  Float
+  status      String   @default("PENDING") // PENDING, CONFIRMED, COMPLETED, CANCELLED
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
