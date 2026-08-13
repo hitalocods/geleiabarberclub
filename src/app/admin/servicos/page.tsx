@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ServiceItem } from '@/lib/db';
-import { Scissors, Plus, Edit2, Trash2, CheckCircle2, XCircle, Upload, Image as ImageIcon } from 'lucide-react';
+import { Scissors, Plus, Edit2, Trash2, CheckCircle2, XCircle, Clock } from 'lucide-react';
 
 export default function ServicesAdminPage() {
   const [services, setServices] = useState<ServiceItem[]>([]);
@@ -18,9 +18,7 @@ export default function ServicesAdminPage() {
   const [price, setPrice] = useState('');
   const [durationMinutes, setDurationMinutes] = useState('30');
   const [category, setCategory] = useState('Cabelo');
-  const [imageUrl, setImageUrl] = useState('');
   const [active, setActive] = useState(true);
-  const [uploading, setUploading] = useState(false);
 
   const fetchServices = async () => {
     try {
@@ -42,11 +40,10 @@ export default function ServicesAdminPage() {
     if (srv) {
       setEditingId(srv.id);
       setTitle(srv.title);
-      setDescription(srv.description);
+      setDescription(srv.description || '');
       setPrice(srv.price.toString());
       setDurationMinutes(srv.durationMinutes.toString());
       setCategory(srv.category);
-      setImageUrl(srv.imageUrl || '');
       setActive(srv.active);
     } else {
       setEditingId(null);
@@ -55,33 +52,9 @@ export default function ServicesAdminPage() {
       setPrice('');
       setDurationMinutes('30');
       setCategory('Cabelo');
-      setImageUrl('');
       setActive(true);
     }
     setIsModalOpen(true);
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    try {
-      const res = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
-        method: 'POST',
-        body: file,
-      });
-      const data = await res.json();
-      if (data.success) {
-        setImageUrl(data.url);
-      } else {
-        alert('Erro ao carregar imagem.');
-      }
-    } catch (err) {
-      alert('Falha no upload.');
-    } finally {
-      setUploading(false);
-    }
   };
 
   const handleSaveService = async (e: React.FormEvent) => {
@@ -98,7 +71,6 @@ export default function ServicesAdminPage() {
       price,
       durationMinutes,
       category,
-      imageUrl,
       active,
     };
 
@@ -153,7 +125,7 @@ export default function ServicesAdminPage() {
             CRUD de <span className="text-brand-red">Serviços</span>
           </h1>
           <p className="text-gray-400 text-sm mt-1">
-            Cadastre, edite preços, duração e imagens dos serviços da barbearia.
+            Cadastre, edite preços, categorias e tempo de duração dos serviços da barbearia.
           </p>
         </div>
 
@@ -165,40 +137,41 @@ export default function ServicesAdminPage() {
         </button>
       </div>
 
-      {/* Services Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Services Grid (Without Photos) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {services.map((srv) => (
           <div
             key={srv.id}
-            className={`bg-brand-card border rounded-2xl overflow-hidden p-6 flex flex-col justify-between space-y-4 relative ${
+            className={`bg-brand-card border rounded-2xl p-5 flex flex-col justify-between space-y-4 relative ${
               srv.active ? 'border-brand-border/80' : 'border-red-900/30 opacity-60'
             }`}
           >
             <div className="space-y-3">
-              <div className="h-44 w-full bg-brand-dark rounded-xl overflow-hidden relative border border-brand-border/60">
-                {srv.imageUrl ? (
-                  <img src={srv.imageUrl} alt={srv.title} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-brand-muted">
-                    <ImageIcon className="w-10 h-10" />
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-brand-red/15 border border-brand-red/30 flex items-center justify-center text-brand-red shrink-0">
+                    <Scissors className="w-4 h-4" />
                   </div>
-                )}
-                <span className="absolute top-3 right-3 bg-brand-red text-white font-extrabold text-sm px-3 py-1 rounded-full shadow-md">
+                  <div>
+                    <span className="text-[10px] font-bold text-brand-red uppercase tracking-wider bg-brand-red/10 px-2 py-0.5 rounded border border-brand-red/20">
+                      {srv.category}
+                    </span>
+                    <h3 className="text-base font-bold text-white mt-1 leading-tight">{srv.title}</h3>
+                  </div>
+                </div>
+
+                <span className="text-brand-red font-black text-lg shrink-0">
                   R$ {srv.price.toFixed(2).replace('.', ',')}
                 </span>
               </div>
 
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-brand-red uppercase tracking-wider bg-brand-red/10 px-2 py-0.5 rounded">
-                    {srv.category}
-                  </span>
-                  <span className="text-xs font-semibold text-gray-400">
-                    {srv.durationMinutes} min
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold text-white mt-2">{srv.title}</h3>
-                <p className="text-gray-400 text-xs mt-1 line-clamp-2">{srv.description}</p>
+              <div className="flex items-center justify-between text-xs text-gray-400 pt-1">
+                <span className="flex items-center gap-1 font-semibold">
+                  <Clock className="w-3.5 h-3.5 text-brand-red" /> {srv.durationMinutes} minutos
+                </span>
+                {srv.description && (
+                  <span className="truncate max-w-[180px] text-gray-500 italic">{srv.description}</span>
+                )}
               </div>
             </div>
 
@@ -206,7 +179,7 @@ export default function ServicesAdminPage() {
               <span className="text-xs flex items-center gap-1 font-semibold">
                 {srv.active ? (
                   <span className="text-emerald-400 flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Ativo no Site
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Ativo
                   </span>
                 ) : (
                   <span className="text-red-400 flex items-center gap-1">
@@ -237,7 +210,7 @@ export default function ServicesAdminPage() {
       {/* CREATE / EDIT MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-brand-card border border-brand-red/50 rounded-3xl max-w-lg w-full p-8 space-y-6 max-h-[90vh] overflow-y-auto">
+          <div className="bg-brand-card border border-brand-red/50 rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-black uppercase text-white border-l-4 border-brand-red pl-3">
               {editingId ? 'Editar Serviço' : 'Novo Serviço'}
             </h2>
@@ -252,7 +225,7 @@ export default function ServicesAdminPage() {
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Ex: Corte Degradê + Barba Terapia"
+                  placeholder="Ex: Corte Degradê / Barba Terapia"
                   className="w-full px-4 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-white text-sm focus:outline-none focus:border-brand-red"
                 />
               </div>
@@ -306,36 +279,15 @@ export default function ServicesAdminPage() {
 
               <div>
                 <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1">
-                  Descrição
+                  Observações / Detalhes (Opcional)
                 </label>
                 <textarea
                   rows={2}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Descreva detalhes do atendimento..."
+                  placeholder="Ex: Inclui lavagem e alinhamento do pezinho"
                   className="w-full px-4 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-white text-sm focus:outline-none focus:border-brand-red"
                 />
-              </div>
-
-              {/* Image Upload & Vercel Blob Ready */}
-              <div>
-                <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1">
-                  URL da Foto do Serviço (Vercel Blob / Unsplash)
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="url"
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    placeholder="https://..."
-                    className="flex-1 px-4 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-white text-sm focus:outline-none focus:border-brand-red"
-                  />
-                  <label className="cursor-pointer px-4 py-2.5 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-red text-white text-xs font-bold flex items-center gap-1.5 shrink-0">
-                    <Upload className="w-4 h-4 text-brand-red" />
-                    {uploading ? 'Enviando...' : 'Upload'}
-                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                  </label>
-                </div>
               </div>
 
               <div className="flex items-center gap-2 pt-2">
@@ -344,9 +296,9 @@ export default function ServicesAdminPage() {
                   id="activeCheck"
                   checked={active}
                   onChange={(e) => setActive(e.target.checked)}
-                  className="w-4 h-4 accent-brand-red"
+                  className="w-4 h-4 accent-brand-red cursor-pointer"
                 />
-                <label htmlFor="activeCheck" className="text-xs font-bold text-gray-300 uppercase">
+                <label htmlFor="activeCheck" className="text-xs font-bold text-gray-300 uppercase cursor-pointer">
                   Serviço Ativo e Disponível para Agendamento
                 </label>
               </div>
@@ -355,13 +307,13 @@ export default function ServicesAdminPage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl bg-brand-dark hover:bg-brand-border text-gray-300 text-xs font-bold uppercase"
+                  className="px-5 py-2.5 rounded-xl bg-brand-dark hover:bg-brand-border text-gray-300 text-xs font-bold uppercase transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-brand-red hover:bg-brand-red-dark text-white text-xs font-extrabold uppercase shadow-md"
+                  className="px-6 py-2.5 rounded-xl bg-brand-red hover:bg-brand-red-dark text-white text-xs font-extrabold uppercase shadow-md transition-colors"
                 >
                   {editingId ? 'Salvar Alterações' : 'Criar Serviço'}
                 </button>
