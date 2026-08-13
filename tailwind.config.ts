@@ -8,6 +8,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-outfit)', 'system-ui', 'sans-serif'],
+      },
       colors: {
         brand: {
           red: '#DC2626',

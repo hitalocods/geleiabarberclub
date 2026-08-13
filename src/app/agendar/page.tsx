@@ -240,51 +240,51 @@ function BookingContent() {
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
               {services.map((srv) => (
                 <div
                   key={srv.id}
                   onClick={() => handleNextFromService(srv)}
-                  className={`p-5 rounded-2xl bg-brand-card border transition-all cursor-pointer flex items-center gap-4 group ${
+                  className={`p-4 rounded-xl bg-brand-card border transition-all cursor-pointer group flex flex-col justify-between space-y-3 ${
                     selectedService?.id === srv.id
                       ? 'border-brand-red bg-brand-red/10 shadow-[0_0_20px_rgba(220,38,38,0.25)]'
                       : 'border-brand-border hover:border-brand-red/60 hover:bg-brand-dark'
                   }`}
                 >
-                  <div className="w-20 h-20 rounded-xl overflow-hidden bg-brand-dark shrink-0 relative">
-                    {srv.imageUrl ? (
-                      <img src={srv.imageUrl} alt={srv.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-brand-muted">
-                        <Scissors className="w-8 h-8" />
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-brand-red/15 border border-brand-red/30 flex items-center justify-center text-brand-red shrink-0">
+                        <Scissors className="w-4 h-4" />
                       </div>
-                    )}
+                      <div>
+                        <span className="text-[9px] font-extrabold text-brand-red uppercase tracking-wider bg-brand-red/10 px-2 py-0.5 rounded border border-brand-red/20">
+                          {srv.category}
+                        </span>
+                        <h3 className="text-base font-bold text-white mt-1 group-hover:text-brand-red transition-colors leading-tight">
+                          {srv.title}
+                        </h3>
+                      </div>
+                    </div>
+
+                    <span className="text-xs font-semibold text-gray-400 shrink-0 flex items-center gap-1 bg-brand-dark px-2.5 py-1 rounded-md border border-brand-border/60">
+                      <Clock className="w-3 h-3 text-brand-red" />
+                      {srv.durationMinutes} min
+                    </span>
                   </div>
 
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-brand-red uppercase tracking-wider bg-brand-red/10 px-2 py-0.5 rounded">
-                        {srv.category}
-                      </span>
-                      <span className="text-xs font-medium text-gray-400 flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-brand-red" />
-                        {srv.durationMinutes} min
-                      </span>
-                    </div>
+                  {srv.description && (
+                    <p className="text-gray-400 text-xs leading-relaxed line-clamp-2 pl-0.5">
+                      {srv.description}
+                    </p>
+                  )}
 
-                    <h3 className="text-base font-bold text-white mt-1 group-hover:text-brand-red transition-colors">
-                      {srv.title}
-                    </h3>
-                    <p className="text-gray-400 text-xs mt-1 line-clamp-2">{srv.description}</p>
-
-                    <div className="mt-3 flex items-center justify-between">
-                      <span className="text-brand-red font-extrabold text-lg">
-                        R$ {srv.price.toFixed(2).replace('.', ',')}
-                      </span>
-                      <span className="text-xs font-semibold text-white group-hover:translate-x-1 transition-transform flex items-center gap-1">
-                        Selecionar <ArrowRight className="w-3.5 h-3.5 text-brand-red" />
-                      </span>
-                    </div>
+                  <div className="pt-2 border-t border-brand-border/40 flex items-center justify-between">
+                    <span className="text-brand-red font-black text-lg">
+                      R$ {srv.price.toFixed(2).replace('.', ',')}
+                    </span>
+                    <span className="text-xs font-bold text-white group-hover:text-brand-red transition-colors flex items-center gap-1">
+                      Selecionar <ArrowRight className="w-3.5 h-3.5 text-brand-red group-hover:translate-x-1 transition-transform" />
+                    </span>
                   </div>
                 </div>
               ))}
